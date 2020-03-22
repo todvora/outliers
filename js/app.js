@@ -104,8 +104,8 @@ var app = new Vue({
                         datasets: [{
                             label: `Elevation gain ${that.computeElevationGain(points).toFixed(1)}m`,
                             pointRadius: 0,
-                            backgroundColor: 'rgb(255, 99, 132)',
-                            borderColor: 'rgb(255, 99, 132)',
+                            backgroundColor: 'rgb(0,43,255, 0.2)',
+                            borderColor: 'rgb(0,43,255)',
                             data: elevations
                         }]
                     },
