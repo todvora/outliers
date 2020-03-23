@@ -3,8 +3,9 @@ var app = new Vue({
     el: '#app',
     data: {
         gpx: null,
-        path: [],
-        elevationGain: 0,
+        filename: null,
+        points: [],
+        elevationGain: null,
         leaflet: {
             map: null,
             polyline: null,
@@ -21,42 +22,22 @@ var app = new Vue({
                 return null;
             }
         }
+        ,
     },
     methods: {
-        toRadians: function (degrees) {
-            return degrees * Math.PI / 180;
-        },
         pointsDistance: function (x, y) {
-            var R = 6371e3; // metres
-            var φ1 = this.toRadians(x.lat);
-            var φ2 = this.toRadians(y.lat);
-            var Δφ = this.toRadians(y.lat - x.lat);
-            var Δλ = this.toRadians(y.lon - x.lon);
-            var a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-                Math.cos(φ1) * Math.cos(φ2) *
-                Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-            var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-            var d = R * c;
-            return d;
-        },
-        parseGpxData: function (data) {
-            this.gpx = data;
-        },
-        loadGpx: function () {
-            fetch('data.gpx')
-                .then(response => response.text())
-                .then(str => (new window.DOMParser()).parseFromString(str, "text/xml"))
-                .then(data => this.parseGpxData(data));
+            return x.latLon().distanceTo(y.latLon());
         },
         initializeLeaflet: function () {
-            this.leaflet.map = L.map('mapid').setView([51.505, -0.09], 13);
+            this.leaflet.map = L.map('mapid').setView([47.8095, 13.0550], 12);
 
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             }).addTo(this.leaflet.map);
         },
         removePoint: function (index, point) {
-            this.path.splice(index, 1);
+            this.points[index].enabled = false;
+            this.renderPoints();
         },
         createPopup: function (index, distance, point) {
             const popup = document.createElement('div');
@@ -83,6 +64,55 @@ var app = new Vue({
             return elevationGain;
 
         },
+        loadFile: function (event) {
+            console.log('Loading file', event);
+            const file = event.target.files[0];
+            this.filename = file.name;
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+                this.gpx = new window.DOMParser().parseFromString(evt.target.result, "text/xml");
+                console.log('File loaded and parsed');
+            };
+            reader.readAsText(file);
+        },
+        downloadFile: function () {
+            const serializer = new XMLSerializer();
+            const str = serializer.serializeToString(this.gpx);
+            var data = new Blob([str], {type: 'type: "application/gpx+xml"'});
+
+            const a = document.createElement('a');
+            document.body.appendChild(a);
+            const url = window.URL.createObjectURL(data);
+            a.href = url;
+            a.download = this.name + '.gpx';
+            a.click();
+            setTimeout(() => {
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            }, 0)
+        },
+        removeFile: function () {
+            this.gpx = null;
+        },
+        clearMap: function () {
+            if (this.leaflet.polyline) {
+                this.leaflet.polyline.remove(this.leaflet.map);
+                this.leaflet.markers.forEach(marker => marker.remove(this.leaflet.map));
+                this.leaflet.polyline = null;
+
+                while (this.leaflet.markers.length > 0) {
+                    this.leaflet.markers.pop();
+                }
+
+            }
+            if (this.leaflet.elevation) {
+                this.leaflet.elevation.remove(this.leaflet.map);
+                this.leaflet.elevation = null;
+            }
+
+            this.leaflet.zoom = false;
+
+        },
         createElevationProfile: function (points) {
             var legend = L.control({position: 'bottomright'});
             const that = this;
@@ -102,7 +132,7 @@ var app = new Vue({
                     data: {
                         labels: elevations,
                         datasets: [{
-                            label: `Elevation gain ${that.computeElevationGain(points).toFixed(1)}m`,
+                            label: 'Elevation gain',
                             pointRadius: 0,
                             backgroundColor: 'rgb(0,43,255, 0.2)',
                             borderColor: 'rgb(0,43,255)',
@@ -113,7 +143,7 @@ var app = new Vue({
                     // Configuration options go here
                     options: {
                         legend: {
-                            display: true
+                            display: false
                         },
                         scales: {
                             xAxes: [{
@@ -127,49 +157,13 @@ var app = new Vue({
                 return div;
             };
             return legend;
-        }
-    },
-    watch: {
-        gpx: function () {
-            if (this.gpx) {
-                // create a red polyline from an array of LatLng points
-
-                const elements = this.gpx.getElementsByTagName('trkpt');
-
-                const points = [];
-
-                for (let item of elements) {
-                    const lat = item.getAttribute('lat');
-                    const lon = item.getAttribute('lon');
-                    const ele = item.getElementsByTagName('ele')[0].innerHTML;
-                    const time = item.getElementsByTagName('time')[0].innerHTML;
-                    points.push({
-                        lat: parseFloat(lat),
-                        lon: parseFloat(lon),
-                        ele: parseFloat(ele),
-                        time: time
-                    });
-                }
-                this.path = points;
-            } else {
-                return null;
-            }
         },
-        path: function (points) {
-
-            if (this.leaflet.polyline) {
-                this.leaflet.polyline.remove(this.leaflet.map);
-                this.leaflet.markers.forEach(marker => marker.remove(this.leaflet.map));
-            }
-
-            if (this.leaflet.elevation) {
-                this.leaflet.elevation.remove(this.leaflet.map);
-            }
-
-            this.leaflet.elevation = this.createElevationProfile(points);
-            this.leaflet.elevation.addTo(this.leaflet.map);
-
+        renderPoints: function () {
+            console.log('Rendering polyline');
+            this.clearMap();
+            const points = this.points.filter(p => p.enabled);
             const path = points.map(point => [point.lat, point.lon]);
+
             this.leaflet.polyline = L.polyline(path, {color: 'red'}).addTo(this.leaflet.map);
             // zoom the map to the polyline
 
@@ -178,6 +172,14 @@ var app = new Vue({
                 this.leaflet.zoom = true;
             }
 
+            console.log('Rendering elevation profile');
+
+            this.leaflet.elevation = this.createElevationProfile(points);
+            this.leaflet.elevation.addTo(this.leaflet.map);
+
+            console.log('Elevation profile rendered');
+
+            this.elevationGain = this.computeElevationGain(points);
 
             for (let i = 1; i < points.length; i++) {
                 const prev = points[i - 1];
@@ -191,11 +193,50 @@ var app = new Vue({
                 }
 
             }
+
+        }
+    },
+    watch: {
+        gpx: function () {
+            if (this.gpx) {
+                const elements = this.gpx.getElementsByTagName('trkpt');
+
+                const points = [];
+
+                for (let item of elements) {
+                    const lat = item.getAttribute('lat');
+                    const lon = item.getAttribute('lon');
+                    const ele = item.getElementsByTagName('ele')[0].innerHTML;
+                    const time = item.getElementsByTagName('time')[0].innerHTML;
+                    const point = {
+                        lat: parseFloat(lat),
+                        lon: parseFloat(lon),
+                        ele: parseFloat(ele),
+                        time: time,
+                        ref: item,
+                        distanceDiff: 0,
+                        elevationDiff: 0,
+                        latLon: function () {
+                            return L.latLng(this.lat, this.lon);
+                        },
+                        isOutlier: false,
+                        enabled: true
+                    };
+                    points.push(point);
+                }
+                this.points = points;
+                console.log('Points parsed and computed');
+            } else {
+                this.clearMap();
+            }
+        },
+        points: function () {
+            this.renderPoints();
+
         }
     },
     mounted: function () {
         this.initializeLeaflet();
-        this.loadGpx();
     }
 });
 

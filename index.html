@@ -17,6 +17,26 @@
 
 <body>
 <div id="app">
+    <div id="navigation">
+        <div v-if="gpx">
+            <h3 v-text="name"></h3>
+            <table>
+                <tr>
+                    <td>File:</td>
+                    <td><span>{{filename}}</span>m</td>
+                </tr>
+                <tr>
+                    <td>Elevation gain:</td>
+                    <td><span>{{elevationGain.toFixed(1)}}</span>m</td>
+            </table>
+            <a href="#" v-on:click.prevent="downloadFile">Download</a>
+            <a href="https://www.strava.com/upload/select" target="_blank">Strava</a>
+            <a href="#" v-on:click.prevent="removeFile">Restart</a>
+        </div>
+        <div v-if="!gpx">
+            Upload: <input type="file" v-on:change="loadFile">
+        </div>
+    </div>
     <div id="mapid"></div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"
