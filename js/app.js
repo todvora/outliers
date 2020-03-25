@@ -27,6 +27,10 @@ var app = new Vue({
     methods: {
         initializeLeaflet: function () {
             this.leaflet.map = L.map('mapid', {preferCanvas: true}).setView([47.8095, 13.0550], 12);
+            this.leaflet.map.on("zoomend",  () => {
+                const radius = Math.max(1, (this.leaflet.map.getZoom() - 16) * 3);
+                this.leaflet.markers.forEach(marker => marker.setRadius(radius));
+            });
 
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
@@ -178,10 +182,6 @@ var app = new Vue({
             this.leaflet.polyline = L.polyline(path, {color: 'red'}).addTo(this.leaflet.map);
             // zoom the map to the polyline
 
-            this.leaflet.polyline.on('click', function (event) {
-                console.log('click', event);
-            }, this);
-
             if (!this.leaflet.zoom) {
                 this.leaflet.map.fitBounds(this.leaflet.polyline.getBounds());
                 this.leaflet.zoom = true;
@@ -195,11 +195,13 @@ var app = new Vue({
 
             this.elevationGain = this.computeElevationGain(points);
 
+            const radius = Math.max(1, (this.leaflet.map.getZoom() - 16) * 3);
+
             points
                 .forEach(point => {
                     let marker = L.circleMarker([point.lat, point.lon], {
                         color: point.isOutlier ? '#ff0000' : '#3388ff',
-                        radius: point.isOutlier ? 3 : 1
+                        radius: radius
                     });
                     this.leaflet.markers.push(marker);
                     marker.addTo(this.leaflet.map);
