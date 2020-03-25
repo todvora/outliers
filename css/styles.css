@@ -23,3 +23,12 @@ html, body, #app, #mapid {
     border-radius: 2px;
     background-color: #f4f4f4d4;
 }
+
+#elevation {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 100%;
+    height: 320px;
+    z-index: 9999;
+}

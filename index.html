@@ -22,10 +22,6 @@
             <h3 v-text="name"></h3>
             <table>
                 <tr>
-                    <td>File:</td>
-                    <td><span>{{filename}}</span>m</td>
-                </tr>
-                <tr>
                     <td>Elevation gain:</td>
                     <td><span>{{elevationGain.toFixed(1)}}</span>m</td>
             </table>
@@ -38,6 +34,9 @@
         </div>
     </div>
     <div id="mapid"></div>
+    <div id="elevation">
+        <canvas id="elevationchart" height="300px"></canvas>
+    </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"
         integrity="sha256-R4pqcOYV8lt7snxMQO/HSbVCFRPMdrhAFMH+vr9giYI=" crossorigin="anonymous"></script>
