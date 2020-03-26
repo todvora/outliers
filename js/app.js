@@ -11,7 +11,7 @@ var app = new Vue({
             polyline: null,
             markers: [],
             elevation: null,
-            zoom: false
+            zoom: 12
         }
     },
     computed: {
@@ -21,15 +21,19 @@ var app = new Vue({
             } else {
                 return null;
             }
+        },
+        pointRadius: function () {
+            return Math.max(1, (this.leaflet.zoom - 16) * 3);
+        },
+        pointsVisible: function () {
+            return this.leaflet.zoom >= 16;
         }
-        ,
     },
     methods: {
         initializeLeaflet: function () {
-            this.leaflet.map = L.map('mapid', {preferCanvas: true}).setView([47.8095, 13.0550], 12);
-            this.leaflet.map.on("zoomend",  () => {
-                const radius = Math.max(1, (this.leaflet.map.getZoom() - 16) * 3);
-                this.leaflet.markers.forEach(marker => marker.setRadius(radius));
+            this.leaflet.map = L.map('mapid', {preferCanvas: true}).setView([47.8095, 13.0550], this.leaflet.zoom);
+            this.leaflet.map.on("zoomend", (e) => {
+                this.leaflet.zoom = this.leaflet.map.getZoom();
             });
 
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -106,7 +110,7 @@ var app = new Vue({
         removeFile: function () {
             this.gpx = null;
         },
-        detectOutliers: function(points) {
+        detectOutliers: function (points) {
             for (let i = 1; i < points.length; i++) {
                 const prev = points[i - 1];
                 const curr = points[i];
@@ -182,10 +186,7 @@ var app = new Vue({
             this.leaflet.polyline = L.polyline(path, {color: 'red'}).addTo(this.leaflet.map);
             // zoom the map to the polyline
 
-            if (!this.leaflet.zoom) {
-                this.leaflet.map.fitBounds(this.leaflet.polyline.getBounds());
-                this.leaflet.zoom = true;
-            }
+            this.leaflet.map.fitBounds(this.leaflet.polyline.getBounds());
 
             console.log('Rendering elevation profile');
 
@@ -195,17 +196,14 @@ var app = new Vue({
 
             this.elevationGain = this.computeElevationGain(points);
 
-            const radius = Math.max(1, (this.leaflet.map.getZoom() - 16) * 3);
-
             points
                 .forEach(point => {
                     let marker = L.circleMarker([point.lat, point.lon], {
                         color: point.isOutlier ? '#ff0000' : '#3388ff',
-                        radius: radius
+                        radius: this.pointRadius
                     });
-                    this.leaflet.markers.push(marker);
-                    marker.addTo(this.leaflet.map);
                     marker.bindPopup(this.createPopup(point));
+                    this.leaflet.markers.push(marker);
                 });
 
         }
@@ -248,7 +246,24 @@ var app = new Vue({
         },
         points: function () {
             this.renderPoints();
-
+        },
+        pointsVisible: function (visible) {
+            if (visible) {
+                this.leaflet.markers.forEach(marker => {
+                    marker.addTo(this.leaflet.map);
+                });
+            } else {
+                this.leaflet.markers.forEach(marker => {
+                    marker.remove(this.leaflet.map);
+                });
+            }
+        },
+        pointRadius: function () {
+            if (this.pointsVisible) {
+                this.leaflet.markers.forEach(marker => {
+                    marker.setRadius(this.pointRadius);
+                });
+            }
         }
     },
     mounted: function () {
