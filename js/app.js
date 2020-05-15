@@ -11,7 +11,8 @@ var app = new Vue({
             polyline: null,
             markers: [],
             elevation: null,
-            zoom: 12
+            zoom: 12,
+            initialZoom: false
         }
     },
     computed: {
@@ -24,9 +25,6 @@ var app = new Vue({
         },
         pointRadius: function () {
             return Math.max(1, (this.leaflet.zoom - 16) * 3);
-        },
-        pointsVisible: function () {
-            return this.leaflet.zoom >= 16;
         }
     },
     methods: {
@@ -184,9 +182,12 @@ var app = new Vue({
             const path = points.map(point => [point.lat, point.lon]);
 
             this.leaflet.polyline = L.polyline(path, {color: 'red'}).addTo(this.leaflet.map);
-            // zoom the map to the polyline
 
-            this.leaflet.map.fitBounds(this.leaflet.polyline.getBounds());
+            // zoom the map to the polyline
+            if(!this.leaflet.initialZoom) {
+                this.leaflet.map.fitBounds(this.leaflet.polyline.getBounds());
+                this.leaflet.initialZoom = true;
+            }
 
             console.log('Rendering elevation profile');
 
@@ -205,6 +206,10 @@ var app = new Vue({
                     marker.bindPopup(this.createPopup(point));
                     this.leaflet.markers.push(marker);
                 });
+
+            this.leaflet.markers.forEach(marker => {
+                marker.addTo(this.leaflet.map);
+            });
 
         }
     },
@@ -247,23 +252,10 @@ var app = new Vue({
         points: function () {
             this.renderPoints();
         },
-        pointsVisible: function (visible) {
-            if (visible) {
-                this.leaflet.markers.forEach(marker => {
-                    marker.addTo(this.leaflet.map);
-                });
-            } else {
-                this.leaflet.markers.forEach(marker => {
-                    marker.remove(this.leaflet.map);
-                });
-            }
-        },
         pointRadius: function () {
-            if (this.pointsVisible) {
-                this.leaflet.markers.forEach(marker => {
-                    marker.setRadius(this.pointRadius);
-                });
-            }
+            this.leaflet.markers.forEach(marker => {
+                marker.setRadius(this.pointRadius);
+            });
         }
     },
     mounted: function () {
