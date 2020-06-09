@@ -32,3 +32,10 @@ html, body, #app, #mapid {
     height: 320px;
     z-index: 9999;
 }
+
+ul {
+    padding: 0;
+}
+ul li {
+    list-style-type: none;
+}

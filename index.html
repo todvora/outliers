@@ -26,9 +26,18 @@
                     <td><span>{{elevationGain.toFixed(1)}}</span>m</td>
                 </tr>
             </table>
-            <a href="#" v-on:click.prevent="downloadFile">Download</a>
-            <a href="https://www.strava.com/upload/select" target="_blank">Strava</a>
-            <a href="#" v-on:click.prevent="removeFile">Restart</a>
+
+            <h3>Multiselect</h3>
+            <ul>
+                <li v-if="!leaflet.multiselect"><a href="#" v-on:click.prevent="switchMultiselect">Enable</a></li>
+                <li v-if="leaflet.multiselect"><a href="#" v-on:click.prevent="removeSelected">Remove all selected points</a></li>
+                <li v-if="leaflet.multiselect"><a href="#" v-on:click.prevent="switchMultiselect">Disable selection tool</a></li>
+            </ul>
+
+            <h3>Track</h3>
+            <a href="#" v-on:click.prevent="downloadFile">Download fixed</a>
+            <a href="https://www.strava.com/upload/select" target="_blank">Open strava</a>
+            <a href="#" v-on:click.prevent="removeFile">Restart app</a>
         </div>
         <div v-if="!gpx">
             Upload: <input type="file" v-on:change="loadFile">
@@ -45,6 +54,8 @@
 <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
         integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
         crossorigin=""></script>
+<script src="js/Leaflet.SelectAreaFeature.js"></script>
+<script src="js/science.v1.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

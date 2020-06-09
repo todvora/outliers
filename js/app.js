@@ -12,7 +12,9 @@ var app = new Vue({
             markers: [],
             elevation: null,
             zoom: 12,
-            initialZoom: false
+            initialZoom: false,
+            multiselect: false,
+            selectArea: null
         }
     },
     computed: {
@@ -43,6 +45,19 @@ var app = new Vue({
         removePoint: function (index, point) {
             this.points[index].enabled = false;
             this.renderPoints();
+        },
+        switchMultiselect: function() {
+           this.leaflet.multiselect = !this.leaflet.multiselect;
+        },
+        removeSelected: function() {
+            const markers = this.leaflet.selectArea.getFeaturesSelected('circlemarker');
+            if(confirm(`Found ${markers.length} points to be removed, continue?`)) {
+                markers.forEach(marker => {
+                    this.points[marker.dataPoint.index].enabled = false;
+                });
+                this.renderPoints();
+                this.leaflet.multiselect = false;
+            }
         },
         createPopup: function (point) {
             const popup = document.createElement('div');
@@ -109,11 +124,23 @@ var app = new Vue({
             this.gpx = null;
         },
         detectOutliers: function (points) {
+
+            if(false) {
+                // disable autodetection for now
+                return points;
+            }
+
+            const initialTime = new Date(points[0].time).getTime();
+            points[0].timeSinceStart = 0;
+
+            console.log(points[0]);
+
             for (let i = 1; i < points.length; i++) {
                 const prev = points[i - 1];
                 const curr = points[i];
                 curr.distanceDiff = curr.distanceTo(prev);
                 curr.elevationDiff = curr.ele - prev.ele;
+                curr.timeSinceStart = (new Date(curr.time).getTime() - initialTime) / 1000;
             }
 
             const totalDistance = points.reduce((acc, item) => acc + item.distanceDiff, 0.0);
@@ -121,8 +148,14 @@ var app = new Vue({
             const averageDistanceDiff = totalDistance / points.length;
             console.log('Average points distance', averageDistanceDiff);
 
+
+            var loess = science.stats.loess().bandwidth(.2);
+            var xs = points.map(p => p.timeSinceStart);
+            var ys = points.map(p => p.ele);
+            const fitted = loess(xs, ys);
+
             points
-                .filter(point => point.distanceDiff > (averageDistanceDiff * 2))
+                .filter(point => Math.abs(point.ele - fitted[point.timeSinceStart]) > 20)
                 .forEach(point => {
                     point.isOutlier = true;
                 });
@@ -196,7 +229,6 @@ var app = new Vue({
             console.log('Elevation profile rendered');
 
             this.elevationGain = this.computeElevationGain(points);
-
             points
                 .forEach(point => {
                     let marker = L.circleMarker([point.lat, point.lon], {
@@ -204,6 +236,7 @@ var app = new Vue({
                         radius: this.pointRadius
                     });
                     marker.bindPopup(this.createPopup(point));
+                    marker.dataPoint = point;
                     this.leaflet.markers.push(marker);
                 });
 
@@ -256,6 +289,14 @@ var app = new Vue({
             this.leaflet.markers.forEach(marker => {
                 marker.setRadius(this.pointRadius);
             });
+        },
+        'leaflet.multiselect': function () {
+            if(this.leaflet.multiselect) {
+                this.leaflet.selectArea = this.leaflet.map.selectAreaFeature.enable();
+            } else {
+                this.leaflet.selectArea.removeAllArea();
+                this.leaflet.selectArea.disable();
+            }
         }
     },
     mounted: function () {
