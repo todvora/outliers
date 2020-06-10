@@ -41,6 +41,7 @@ h2 {
     padding: 10px;
     z-index: 9999;
     box-shadow: 0 0 5px gray;
+    overflow-y: scroll;
 }
 
  #mapid {
