@@ -8,6 +8,28 @@ html, body, #app {
     width: 100%;
 }
 
+code {
+    border: 1px solid pink;
+    border-radius: 2px;
+    padding: 2px;
+    margin: 2px;
+    white-space: nowrap;
+}
+
+h2 {
+    font-size: 120%;
+}
+
+.infobox {
+    color: #31708f;
+    border: 1px;
+    background-color: #d9edf7;
+    border-color: #bce8f1;
+    border-radius: 2px;
+    padding: 2px;
+    margin: 2px;
+}
+
 .right {
     width: 100%;
     display: flex;
@@ -16,7 +38,7 @@ html, body, #app {
 
 #navigation {
     width: 20%;
-    padding: 5px;
+    padding: 10px;
     z-index: 9999;
     box-shadow: 0 0 5px gray;
 }
@@ -42,13 +64,12 @@ html, body, #app {
 }
 
 .hint {
-    text-align: center;
+    font-size:80%;
     color: #353434;
 }
 
-.small {
-    font-size:80%;
-    color: #7b7171;
+.center {
+    text-align:center;
 }
 
 .leaflet-popup-content p {
@@ -66,4 +87,8 @@ ul li {
   fill: none;
   stroke: steelblue;
   stroke-width: 2px;
+}
+
+div.done h2::after {
+  content: " ✓";
 }

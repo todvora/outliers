@@ -3,6 +3,7 @@ var app = new Vue({
     el: '#app',
     data: {
         loading: false,
+        downloaded: false,
         gpx: null,
         filename: null,
         points: [],
@@ -31,6 +32,15 @@ var app = new Vue({
         },
         removedPoints: function() {
             return this.points.filter(p => !p.enabled);
+        },
+        stepUpload: function() {
+            return this.gpx;
+        },
+        stepEdit: function() {
+            return this.removedPoints.length > 0;
+        },
+        stepDownload: function() {
+            return this.downloaded;
         }
     },
     methods: {
@@ -118,6 +128,7 @@ var app = new Vue({
             a.href = url;
             a.download = this.filename.replace('.gpx', '_fixed.gpx');
             a.click();
+            this.downloaded = true;
             setTimeout(() => {
                 window.URL.revokeObjectURL(url);
                 document.body.removeChild(a);

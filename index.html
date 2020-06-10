@@ -18,50 +18,50 @@
 <body>
 <div id="app">
     <div id="navigation">
-        <p id="loading" v-if="loading" class="hint">Loading and processing activity...</p>
-        <div v-if="gpx">
-            <h3 v-text="name"></h3>
-            <table>
-                <tr>
-                    <td>Total points:</td>
-                    <td><span>{{points.length}}</span></td>
-                </tr>
-                <tr>
-                    <td>Removed points:</td>
-                    <td><span>{{removedPoints.length}}</span></td>
-                </tr>
-                <tr>
-                    <td>Elevation gain:</td>
-                    <td><span>{{elevationGain.toFixed(1)}}</span>m</td>
-                </tr>
-            </table>
-
-            <h3>Tools</h3>
-            <ul>
-                <li v-if="!leaflet.multiselect"><a href="#" v-on:click.prevent="switchMultiselect">Select by drawing</a></li>
-                <li v-if="leaflet.multiselect"><a href="#" v-on:click.prevent="removeSelected">Remove all selected points</a></li>
-                <li v-if="leaflet.multiselect"><a href="#" v-on:click.prevent="switchMultiselect">Cancel selection</a></li>
-            </ul>
-
-            <h3>Track</h3>
-            <ul>
-                <li><a href="#" v-on:click.prevent="downloadFile">Download fixed</a></li>
-                <li><a href="https://www.strava.com/upload/select" target="_blank">Open strava</a></li>
-                <li><a href="#" v-on:click.prevent="removeFile">Restart app</a></li>
-            </ul>
+        <div v-bind:class="{done:stepUpload}">
+            <h2>1. Export from Strava</h2>
+            <p>Open the <a href="https://www.strava.com/athlete/training" target="_blank"> Strava web interface</a>. In the activity details under <code>⚬⚬⚬</code> select <code>Export GPX</code>.</p>
         </div>
-        <div v-if="!gpx && !loading">
-            <p class="hint">Export a GPX track of your activity from Strava and select it here.</p>
-            <p class="hint"><input type="file" v-on:change="loadFile"></p>
-            <p class="hint small">The GPX file will never be uploaded to any server, all the processing happens only in your browser.
-            </p>
-
+        <div v-bind:class="{done:stepUpload}">
+            <h2>2. Open the GPX here</h2>
+            <div v-if="!gpx && !loading">
+                <p><input type="file" v-on:change="loadFile"></p>
+                <p class="hint">The GPX file will never be uploaded to any server, all the processing happens only in your browser.
+                </p>
+            </div>
+            <p id="loading" v-if="loading" class="hint">Loading and processing activity...</p>
+            <div v-if="gpx">
+                <div class="infobox">
+                    <p>File {{filename}} contains {{points.length}} GPS points.</p>
+                </div>
+            </div>
+        </div>
+        <div v-bind:class="{done: stepEdit}">
+            <h2>3. Edit the track</h2>
+                <p>Click on each wrong point and select <code>remove</code>. You can also draw an area around all points should be removed.</p>
+                <ul>
+                    <li v-if="!leaflet.multiselect"><a href="#" v-on:click.prevent="switchMultiselect">Select by drawing</a></li>
+                    <li v-if="leaflet.multiselect"><a href="#" v-on:click.prevent="removeSelected">Remove all selected points</a></li>
+                    <li v-if="leaflet.multiselect"><a href="#" v-on:click.prevent="switchMultiselect">Cancel selection</a></li>
+                </ul>
+            <div class="infobox" v-if="removedPoints.length > 0">
+                <p>Removed points {{removedPoints.length}} so far.</p>
+            </div>
+            </div>
+        <div v-bind:class="{done: stepDownload}">
+            <h2>4. Download fixed GPX</h2>
+            <p><a href="#" v-on:click.prevent="downloadFile">Click to download</a> your fixed track as a GPX file.</p>
+        </div>
+        <div>
+            <h2>5. Upload back to strava</h2>
+            <a href="https://www.strava.com/upload/select" target="_blank">Open strava</a> and provide the just fixed
+            GPX track. You may need to remove the old activity first.
         </div>
     </div>
     <div class="right">
         <div id="mapid"></div>
         <div id="elevation">
-            <p v-if="points.length == 0" class="hint">Upload a GPX track to see elevation profile</p>
+            <p v-if="points.length == 0" class="hint center">Upload a GPX track to see elevation profile</p>
         </div>
     </div>
 
