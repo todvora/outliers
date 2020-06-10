@@ -43,13 +43,15 @@
             Upload: <input type="file" v-on:change="loadFile">
         </div>
     </div>
-    <div id="mapid"></div>
-    <div id="elevation">
-        <canvas id="elevationchart" height="300px"></canvas>
+    <div class="right">
+        <div id="mapid"></div>
+        <div id="elevation">
+            <p v-if="points.length == 0">Upload a GPX track to see elevation profile</p>
+        </div>
     </div>
+
 </div>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"
-        integrity="sha256-R4pqcOYV8lt7snxMQO/HSbVCFRPMdrhAFMH+vr9giYI=" crossorigin="anonymous"></script>
+<script src="https://d3js.org/d3.v5.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/vue@2.6.11"></script>
 <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
         integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="

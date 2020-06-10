@@ -125,7 +125,7 @@ var app = new Vue({
         },
         detectOutliers: function (points) {
 
-            if(false) {
+            if(true) {
                 // disable autodetection for now
                 return points;
             }
@@ -179,34 +179,50 @@ var app = new Vue({
             }
         },
         renderElevationChart: function (points) {
-            const canvas = document.getElementById('elevationchart');
-            canvas.setAttribute("width", document.body.offsetWidth);
-            var ctx = canvas.getContext('2d');
-            const elevations = points.map(p => p.ele);
-            var chart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: elevations,
-                    datasets: [{
-                        label: 'Elevation gain',
-                        pointRadius: 0,
-                        backgroundColor: 'rgb(0,43,255, 0.2)',
-                        borderColor: 'rgb(0,43,255)',
-                        data: elevations
-                    }]
-                },
-                // Configuration options go here
-                options: {
-                    legend: {
-                        display: false
-                    },
-                    scales: {
-                        xAxes: [{
-                            display: false //this will remove all the x-axis grid lines
-                        }]
-                    }
-                }
-            });
+
+          d3.select("#elevation svg").remove();
+
+          var parentDiv = document.getElementById("elevation");
+
+          var margin = {top: 10, right: 10, bottom: 20, left: 70},
+              width = parentDiv.clientWidth - margin.left - margin.right,
+              height = 170 - margin.top - margin.bottom;
+
+           // set the ranges
+           var x = d3.scaleTime().range([0, width]);
+           var y = d3.scaleLinear().range([height, 0]);
+
+           // define the line
+           var valueline = d3.line()
+               .x(function(d) { return x(d.date); })
+               .y(function(d) { return y(d.ele); });
+
+           var svg = d3.select("#elevation").append("svg")
+               .attr("width", width + margin.left + margin.right)
+               .attr("height", height + margin.top + margin.bottom)
+             .append("g")
+               .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+          // Scale the range of the data
+           x.domain(d3.extent(points, function(d) { return d.date; }));
+           y.domain(d3.extent(points, function(d) { return d.ele; }));
+
+           // Add the valueline path.
+           svg.append("path")
+               .data([points])
+               .attr("class", "line")
+               .attr("d", valueline);
+
+           // Add the x Axis
+           svg.append("g")
+               .attr("transform", "translate(0," + height + ")")
+               .call(d3.axisBottom(x));
+
+           // Add the y Axis
+           svg.append("g")
+               .call(d3.axisLeft(y));
+
+
         },
         renderPoints: function () {
             console.log('Rendering polyline');
@@ -265,6 +281,7 @@ var app = new Vue({
                         lon: parseFloat(lon),
                         ele: parseFloat(ele),
                         time: time,
+                        date: new Date(time),
                         ref: item,
                         distanceDiff: 0,
                         elevationDiff: 0,
