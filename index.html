@@ -18,35 +18,50 @@
 <body>
 <div id="app">
     <div id="navigation">
+        <p id="loading" v-if="loading" class="hint">Loading and processing activity...</p>
         <div v-if="gpx">
             <h3 v-text="name"></h3>
             <table>
+                <tr>
+                    <td>Total points:</td>
+                    <td><span>{{points.length}}</span></td>
+                </tr>
+                <tr>
+                    <td>Removed points:</td>
+                    <td><span>{{removedPoints.length}}</span></td>
+                </tr>
                 <tr>
                     <td>Elevation gain:</td>
                     <td><span>{{elevationGain.toFixed(1)}}</span>m</td>
                 </tr>
             </table>
 
-            <h3>Multiselect</h3>
+            <h3>Multi-select</h3>
             <ul>
-                <li v-if="!leaflet.multiselect"><a href="#" v-on:click.prevent="switchMultiselect">Enable</a></li>
+                <li v-if="!leaflet.multiselect"><a href="#" v-on:click.prevent="switchMultiselect">Activate</a></li>
                 <li v-if="leaflet.multiselect"><a href="#" v-on:click.prevent="removeSelected">Remove all selected points</a></li>
-                <li v-if="leaflet.multiselect"><a href="#" v-on:click.prevent="switchMultiselect">Disable selection tool</a></li>
+                <li v-if="leaflet.multiselect"><a href="#" v-on:click.prevent="switchMultiselect">Disable multi-select</a></li>
             </ul>
 
             <h3>Track</h3>
-            <a href="#" v-on:click.prevent="downloadFile">Download fixed</a>
-            <a href="https://www.strava.com/upload/select" target="_blank">Open strava</a>
-            <a href="#" v-on:click.prevent="removeFile">Restart app</a>
+            <ul>
+                <li><a href="#" v-on:click.prevent="downloadFile">Download fixed</a></li>
+                <li><a href="https://www.strava.com/upload/select" target="_blank">Open strava</a></li>
+                <li><a href="#" v-on:click.prevent="removeFile">Restart app</a></li>
+            </ul>
         </div>
-        <div v-if="!gpx">
-            Upload: <input type="file" v-on:change="loadFile">
+        <div v-if="!gpx && !loading">
+            <p class="hint">Export a GPX track of your activity from Strava and select it here.</p>
+            <p class="hint"><input type="file" v-on:change="loadFile"></p>
+            <p class="hint small">The GPX file will never be uploaded to any server, all the processing happens only in your browser.
+            </p>
+
         </div>
     </div>
     <div class="right">
         <div id="mapid"></div>
         <div id="elevation">
-            <p v-if="points.length == 0">Upload a GPX track to see elevation profile</p>
+            <p v-if="points.length == 0" class="hint">Upload a GPX track to see elevation profile</p>
         </div>
     </div>
 

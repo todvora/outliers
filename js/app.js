@@ -2,6 +2,7 @@ var app = new Vue({
 
     el: '#app',
     data: {
+        loading: false,
         gpx: null,
         filename: null,
         points: [],
@@ -27,6 +28,9 @@ var app = new Vue({
         },
         pointRadius: function () {
             return Math.max(1, (this.leaflet.zoom - 16) * 3);
+        },
+        removedPoints: function() {
+            return this.points.filter(p => !p.enabled);
         }
     },
     methods: {
@@ -87,13 +91,12 @@ var app = new Vue({
 
         },
         loadFile: function (event) {
-            console.log('Loading file', event);
+            this.loading = true;
             const file = event.target.files[0];
             this.filename = file.name;
             const reader = new FileReader();
             reader.onload = (evt) => {
                 this.gpx = new window.DOMParser().parseFromString(evt.target.result, "text/xml");
-                console.log('File loaded and parsed');
             };
             reader.readAsText(file);
         },
@@ -295,6 +298,7 @@ var app = new Vue({
                 }
                 this.points = this.detectOutliers(points);
                 console.log('Points parsed and computed');
+                this.loading = false;
             } else {
                 this.clearMap();
             }
