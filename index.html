@@ -36,11 +36,11 @@
                 </tr>
             </table>
 
-            <h3>Multi-select</h3>
+            <h3>Tools</h3>
             <ul>
-                <li v-if="!leaflet.multiselect"><a href="#" v-on:click.prevent="switchMultiselect">Activate</a></li>
+                <li v-if="!leaflet.multiselect"><a href="#" v-on:click.prevent="switchMultiselect">Select by drawing</a></li>
                 <li v-if="leaflet.multiselect"><a href="#" v-on:click.prevent="removeSelected">Remove all selected points</a></li>
-                <li v-if="leaflet.multiselect"><a href="#" v-on:click.prevent="switchMultiselect">Disable multi-select</a></li>
+                <li v-if="leaflet.multiselect"><a href="#" v-on:click.prevent="switchMultiselect">Cancel selection</a></li>
             </ul>
 
             <h3>Track</h3>
