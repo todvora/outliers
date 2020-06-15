@@ -60,8 +60,11 @@ var app = new Vue({
             this.points[index].enabled = false;
             this.renderPoints();
         },
-        switchMultiselect: function() {
-           this.leaflet.multiselect = !this.leaflet.multiselect;
+        enableMultiselect: function() {
+           this.leaflet.multiselect = true;
+        },
+        disableMultiselect: function() {
+           this.leaflet.multiselect = false;
         },
         removeSelected: function() {
             const markers = this.leaflet.selectArea.getFeaturesSelected('circlemarker');

@@ -12,7 +12,6 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
           integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
           crossorigin=""/>
-
 </head>
 
 <body>
@@ -38,12 +37,7 @@
         </div>
         <div v-bind:class="{done: stepEdit}">
             <h2>3. Edit the track</h2>
-                <p>Click on each wrong point and select <code>remove</code>. You can also draw an area around all points that should be removed.</p>
-                <ul>
-                    <li v-if="!leaflet.multiselect"><a href="#" v-on:click.prevent="switchMultiselect">Select by drawing</a></li>
-                    <li v-if="leaflet.multiselect"><a href="#" v-on:click.prevent="removeSelected">Remove all selected points</a></li>
-                    <li v-if="leaflet.multiselect"><a href="#" v-on:click.prevent="switchMultiselect">Cancel selection</a></li>
-                </ul>
+                <p>Click on each wrong point and select <code>remove</code>. You can also draw an area around all points that should be removed (see the toolbar in the top right corner).</p>
             <div class="infobox" v-if="removedPoints.length > 0">
                 <p>Removed points {{removedPoints.length}} so far.</p>
             </div>
@@ -62,6 +56,11 @@
         <div id="mapid"></div>
         <div id="elevation">
             <p v-if="points.length == 0" class="hint center">Upload a GPX track to see elevation profile</p>
+        </div>
+        <div class="toolbox leaflet-bar">
+            <a href="#" title="Select single point" class="icon pointer" v-on:click.prevent="disableMultiselect" v-bind:class="{active: !leaflet.multiselect}"></a>
+            <a href="#" title="Select points by drawing" class="icon multiselect" v-on:click.prevent="enableMultiselect" v-bind:class="{active: leaflet.multiselect}"></a>
+            <a href="#" title="Delete selected points" class="icon delete" v-on:click.prevent="removeSelected" ></a>
         </div>
     </div>
 
