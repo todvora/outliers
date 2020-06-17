@@ -79,9 +79,9 @@ var app = new Vue({
         createPopup: function (point) {
             const popup = document.createElement('div');
             const info = document.createElement('p');
-            info.appendChild(document.createTextNode(`Distance: ${point.distanceDiff.toFixed(1)}m`));
+            info.appendChild(document.createTextNode(`Time: ${new Date(point.time).toLocaleString()}`));
             info.appendChild(document.createElement('br'));
-            info.appendChild(document.createTextNode(`Elevation diff: ${point.elevationDiff.toFixed(1)}m`));
+            info.appendChild(document.createTextNode(`Elevation: ${point.ele.toFixed(1)}m`));
             popup.appendChild(info);
             const removeLink = document.createElement('a');
             removeLink.innerText = 'Remove';
