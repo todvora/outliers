@@ -57,7 +57,7 @@
         <div id="elevation">
             <p v-if="points.length == 0" class="hint center">Upload a GPX track to see elevation profile</p>
         </div>
-        <div class="toolbox leaflet-bar">
+        <div class="toolbox leaflet-bar" v-if="gpx !== null">
             <a href="#" title="Select single point" class="icon pointer" v-on:click.prevent="disableMultiselect" v-bind:class="{active: !leaflet.multiselect}"></a>
             <a href="#" title="Select points by drawing" class="icon multiselect" v-on:click.prevent="enableMultiselect" v-bind:class="{active: leaflet.multiselect}"></a>
             <a href="#" title="Delete selected points" class="icon delete" v-on:click.prevent="removeSelected" ></a>

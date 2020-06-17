@@ -137,9 +137,6 @@ var app = new Vue({
                 document.body.removeChild(a);
             }, 0)
         },
-        removeFile: function () {
-            this.gpx = null;
-        },
         detectOutliers: function (points) {
 
             if(true) {
@@ -261,7 +258,7 @@ var app = new Vue({
 
             console.log('Elevation profile rendered');
 
-            this.elevationGain = this.computeElevationGain(points);
+            // this.elevationGain = this.computeElevationGain(points);
             points
                 .forEach(point => {
                     let marker = L.circleMarker([point.lat, point.lon], {
