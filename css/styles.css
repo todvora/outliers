@@ -132,3 +132,9 @@ div.done h2::after {
 .toolbox .active {
     background-color:lightgray;
 }
+
+.footer {
+    margin-top: 20px;
+    border-top: 1px solid lightgray;
+    font-size: 90%;
+}
