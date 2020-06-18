@@ -299,9 +299,11 @@ var app = new Vue({
                         ref: item,
                         distanceDiff: 0,
                         elevationDiff: 0,
+                        /*
                         distanceTo: function (other) {
                             return L.latLng(this.lat, this.lon).distanceTo(L.latLng(other.lat, other.lon));
                         },
+                        */
                         isOutlier: false,
                         enabled: true
                     };
